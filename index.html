@@ -1,0 +1,329 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#090a12">
+  <meta name="description" content="Phantom TT Hub — extract and download videos from supported public links.">
+  <title>Phantom TT Hub</title>
+  <style>
+    :root{color-scheme:dark;--bg:#090a12;--panel:#111321;--panel2:#171a2b;--line:#2c3047;--text:#f4f5ff;--muted:#a5a8c2;--purple:#9b7bff;--cyan:#5fe5e0;--pink:#ff6ca8;--danger:#ff8c9c;--green:#80f0bb}
+    *{box-sizing:border-box}
+    html{min-height:100%;background:var(--bg)}
+    body{margin:0;min-height:100vh;color:var(--text);font:15px/1.55 Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:radial-gradient(ellipse at 14% 0%,#29204e 0,transparent 36rem),radial-gradient(ellipse at 100% 20%,#12343d 0,transparent 32rem),var(--bg)}
+    a{color:inherit}
+    button,input{font:inherit}
+    .shell{width:min(1040px,calc(100% - 32px));margin:0 auto;padding:34px 0 54px}
+    header{display:flex;justify-content:space-between;align-items:center;gap:18px;margin-bottom:48px}
+    .brand{display:flex;align-items:center;gap:12px;font-weight:900;letter-spacing:.08em}
+    .logo{width:44px;height:44px;display:grid;place-items:center;border:1px solid #7165b9;border-radius:15px;background:linear-gradient(135deg,#9b7bff33,#5fe5e022);box-shadow:0 0 28px #9b7bff16;font-size:22px}
+    .brand small{display:block;font-size:10px;color:var(--muted);font-weight:650;letter-spacing:.2em;margin-top:1px}
+    .health{display:flex;align-items:center;gap:8px;padding:8px 12px;border:1px solid var(--line);border-radius:999px;color:var(--muted);font-size:12px;background:#111321a8;white-space:nowrap}
+    .dot{width:7px;height:7px;border-radius:50%;background:var(--green);box-shadow:0 0 12px #80f0bb75}
+    .hero{text-align:center;max-width:750px;margin:0 auto 30px}
+    .eyebrow{display:inline-flex;align-items:center;gap:8px;border:1px solid #5f528b;border-radius:999px;padding:6px 11px;color:#d6ccff;background:#8f6bff12;font-size:11px;letter-spacing:.13em;text-transform:uppercase;font-weight:800}
+    h1{font-size:clamp(38px,7vw,68px);line-height:1.04;letter-spacing:-.055em;margin:19px 0 16px;font-weight:900}
+    h1 span{background:linear-gradient(95deg,#b29cff 10%,#6ee9e3 90%);color:transparent;background-clip:text;-webkit-background-clip:text}
+    .sub{max-width:590px;margin:0 auto;color:var(--muted);font-size:16px}
+    .panel{border:1px solid #343751;background:linear-gradient(145deg,#151729eF,#0f111ff2);border-radius:25px;box-shadow:0 25px 90px #0005;padding:23px}
+    .input-label{display:block;font-size:12px;font-weight:750;color:#d9dbf1;margin:0 0 10px 3px;letter-spacing:.06em;text-transform:uppercase}
+    .input-row{display:flex;gap:10px}
+    .url-input{min-width:0;flex:1;border:1px solid #373b56;border-radius:14px;padding:16px 17px;background:#090b16;color:var(--text);outline:none;transition:border-color .2s,box-shadow .2s}
+    .url-input:focus{border-color:var(--purple);box-shadow:0 0 0 3px #9b7bff20}
+    .url-input::placeholder{color:#6f7390}
+    .btn{display:inline-flex;align-items:center;justify-content:center;gap:9px;border:0;border-radius:13px;padding:14px 18px;font-weight:850;text-decoration:none;cursor:pointer;transition:transform .18s,filter .18s;white-space:nowrap}
+    .btn:hover{transform:translateY(-1px);filter:brightness(1.08)}
+    .btn:disabled{opacity:.65;cursor:wait;transform:none}
+    .btn-primary{color:#11101e;background:linear-gradient(100deg,#b3a0ff,#6ce9e2);box-shadow:0 8px 28px #8c79ff26}
+    .btn-dark{border:1px solid #3a3e59;background:#1b1e31;color:#f2f3ff}
+    .platforms{display:flex;flex-wrap:wrap;gap:8px;margin-top:15px;color:var(--muted);font-size:11px;align-items:center}
+    .platform{padding:5px 9px;border:1px solid #30334b;border-radius:999px;background:#ffffff04}
+    .message{display:none;margin:14px 2px 0;padding:11px 13px;border-radius:12px;font-size:13px;color:#dfdcff;background:#9b7bff14;border:1px solid #7464aa55}
+    .message.show{display:block}.message.error{color:#ffc2ca;border-color:#834653;background:#ff6c8010}
+    .result{display:none;margin-top:18px;overflow:hidden}
+    .result.show{display:block;animation:rise .3s ease both}
+    .result-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:17px}
+    .section-kicker{font-size:11px;text-transform:uppercase;letter-spacing:.16em;font-weight:900;color:var(--cyan)}
+    .badge{border:1px solid #465069;border-radius:999px;padding:5px 9px;color:#c4c8e3;font-size:11px}
+    .result-grid{display:grid;grid-template-columns:minmax(170px,260px) 1fr;gap:22px;align-items:stretch}
+    .thumb-wrap{min-height:180px;background:#090b16;border:1px solid #30344c;border-radius:16px;overflow:hidden;display:grid;place-items:center;color:#777c98}
+    .thumb{width:100%;height:100%;min-height:180px;max-height:340px;object-fit:cover;display:block}
+    .video-info{display:flex;flex-direction:column;align-items:flex-start;min-width:0}
+    .video-title{margin:0 0 8px;font-size:clamp(18px,3vw,24px);line-height:1.25;overflow-wrap:anywhere}
+    .uploader{margin:0 0 17px;color:var(--muted);font-size:13px}
+    .download-actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:auto}
+    .download-note{font-size:11px;color:var(--muted);margin-top:12px}
+    .features{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:25px 0 42px}
+    .feature{padding:16px;border:1px solid #282c42;border-radius:16px;background:#1113218a}
+    .feature-icon{font-size:19px;margin-bottom:8px}
+    .feature strong{display:block;font-size:13px;margin-bottom:4px}
+    .feature p{margin:0;color:var(--muted);font-size:12px}
+    .history-section{margin-top:30px}
+    .history-head{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-bottom:13px}
+    h2{font-size:19px;letter-spacing:-.02em;margin:0}
+    .muted{color:var(--muted);font-size:12px}
+    .history-list{display:grid;gap:9px}
+    .history-item{display:flex;align-items:center;gap:13px;border:1px solid #292d42;background:#111321b8;padding:11px 13px;border-radius:14px;min-width:0}
+    .history-thumb{width:48px;height:55px;flex-shrink:0;object-fit:cover;border-radius:9px;background:#0b0d18}
+    .history-copy{min-width:0;flex:1}
+    .history-title{font-size:13px;font-weight:750;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    .history-meta{font-size:11px;color:var(--muted);margin-top:3px}
+    .history-use{background:#20233a;color:#e6e4ff;border:1px solid #383c57;border-radius:9px;padding:8px 10px;cursor:pointer;font-size:11px;font-weight:800}
+    .empty{border:1px dashed #343850;border-radius:14px;text-align:center;padding:26px;color:var(--muted);font-size:13px}
+    .site-notes{border-top:1px solid #25283a;padding-top:18px;margin-top:36px;text-align:center;color:#8185a1;font-size:11px}
+    .fineprint{max-width:620px;margin:8px auto 0}
+    footer{padding:14px 0 0;margin-top:4px;text-align:center;color:#8185a1;font-size:12px;letter-spacing:.01em}
+    @keyframes rise{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+    @media(max-width:680px){.shell{width:min(100% - 22px,1040px);padding-top:20px}header{margin-bottom:35px}.brand{font-size:13px}.logo{width:39px;height:39px}.health{font-size:10px;padding:7px 9px}.panel{padding:15px;border-radius:20px}.input-row{flex-direction:column}.btn{width:100%}.result-grid{grid-template-columns:1fr}.thumb-wrap{max-height:320px}.thumb{max-height:320px}.download-actions{width:100%}.download-actions .btn{flex:1;white-space:normal}.features{grid-template-columns:1fr;margin-bottom:33px}.feature{display:flex;gap:12px;align-items:flex-start}.feature-icon{margin:1px 0 0}.history-item{padding:9px}.history-use{padding:8px}.sub{font-size:14px}}
+    @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <header>
+      <div class="brand"><div class="logo" aria-hidden="true">ϟ</div><div>PHANTOM TT HUB<small>VIDEO EXTRACTION SYSTEM</small></div></div>
+      <div class="health"><span class="dot" id="healthDot"></span><span id="healthText">Checking service…</span></div>
+    </header>
+
+    <section class="hero">
+      <div class="eyebrow">✦ One link. One clean download.</div>
+      <h1>Your videos.<br><span>Without the hassle.</span></h1>
+      <p class="sub">Paste a public video link to extract the available video stream. TikTok HD no-watermark extraction is the main feature.</p>
+    </section>
+
+    <section class="panel" aria-label="Video extractor">
+      <form id="extractForm">
+        <label class="input-label" for="videoUrl">Video URL</label>
+        <div class="input-row">
+          <input class="url-input" id="videoUrl" name="url" type="url" inputmode="url" placeholder="Paste TikTok, Instagram, YouTube, X… link here" autocomplete="url" required>
+          <button class="btn btn-primary" id="extractBtn" type="submit"><span>✦</span><span id="extractText">Extract video</span></button>
+        </div>
+      </form>
+      <div class="platforms" aria-label="Supported platforms"><span>Works with</span><span class="platform">TikTok</span><span class="platform">Instagram</span><span class="platform">Facebook</span><span class="platform">X / Twitter</span><span class="platform">Pinterest</span><span class="platform">YouTube</span><span class="platform">More links</span></div>
+      <div class="message" id="message" role="status" aria-live="polite"></div>
+
+      <section class="result" id="result" aria-live="polite">
+        <div class="result-head"><span class="section-kicker">Extraction ready</span><span class="badge" id="platformBadge">VIDEO</span></div>
+        <div class="result-grid">
+          <div class="thumb-wrap" id="thumbWrap"><span id="thumbFallback">Preview unavailable</span></div>
+          <div class="video-info">
+            <h2 class="video-title" id="videoTitle">Video title</h2>
+            <p class="uploader" id="videoUploader">Creator</p>
+            <div class="download-actions">
+              <a class="btn btn-primary" id="downloadBtn" href="#" download>↓ Download NO WATERMARK HD</a>
+              <a class="btn btn-dark" id="directBtn" href="#" target="_blank" rel="noopener noreferrer">↗ Open Direct Link</a>
+            </div>
+            <p class="download-note" id="downloadNote">The file is streamed through the Phantom proxy so an expired HTML page isn't saved as a video.</p>
+          </div>
+        </div>
+      </section>
+    </section>
+
+    <section class="features" aria-label="Features">
+      <article class="feature"><div class="feature-icon" aria-hidden="true">◇</div><div><strong>TikTok HD first</strong><p>Uses the TikWM HD stream first, with yt-dlp as a fallback extractor.</p></div></article>
+      <article class="feature"><div class="feature-icon" aria-hidden="true">⇩</div><div><strong>Proxy download</strong><p>Streams the file through the backend and flags HTML/expired links.</p></div></article>
+      <article class="feature"><div class="feature-icon" aria-hidden="true">◷</div><div><strong>Recent extractions</strong><p>Quickly revisit recent links processed by this running instance.</p></div></article>
+    </section>
+
+    <section class="history-section">
+      <div class="history-head"><h2>Recent extractions</h2><span class="muted" id="historyCount">0 items</span></div>
+      <div class="history-list" id="historyList"><div class="empty">Your recent extractions will show up here.</div></div>
+    </section>
+
+    <div class="site-notes">
+      <span>© <span id="year"></span> PHANTOM TT HUB</span>
+      <p class="fineprint">Only download content you own or have permission to save. Results depend on each platform's availability and may expire. History is temporary on serverless deployments.</p>
+    </div>
+    <footer>Made with 💜 by Phantom • PhantomTheDev</footer>
+  </main>
+
+  <script>
+    const form = document.getElementById('extractForm');
+    const urlInput = document.getElementById('videoUrl');
+    const extractBtn = document.getElementById('extractBtn');
+    const extractText = document.getElementById('extractText');
+    const message = document.getElementById('message');
+    const resultPanel = document.getElementById('result');
+    const downloadBtn = document.getElementById('downloadBtn');
+    const directBtn = document.getElementById('directBtn');
+    const downloadNote = document.getElementById('downloadNote');
+    const historyList = document.getElementById('historyList');
+    const historyCount = document.getElementById('historyCount');
+
+    document.getElementById('year').textContent = new Date().getFullYear();
+
+    function showMessage(text, isError = false) {
+      message.textContent = text;
+      message.className = 'message show' + (isError ? ' error' : '');
+    }
+    function hideMessage() {
+      message.textContent = '';
+      message.className = 'message';
+    }
+    function setLoading(loading) {
+      extractBtn.disabled = loading;
+      extractText.textContent = loading ? 'Extracting…' : 'Extract video';
+    }
+    function safeHttpUrl(value) {
+      try {
+        const parsed = new URL(value);
+        return ['http:', 'https:'].includes(parsed.protocol) ? parsed.href : '';
+      } catch (_) { return ''; }
+    }
+    function setThumbnail(url) {
+      const wrap = document.getElementById('thumbWrap');
+      wrap.replaceChildren();
+      const safeUrl = safeHttpUrl(url);
+      if (!safeUrl) {
+        const fallback = document.createElement('span');
+        fallback.textContent = 'Preview unavailable';
+        wrap.appendChild(fallback);
+        return;
+      }
+      const img = document.createElement('img');
+      img.className = 'thumb';
+      img.alt = 'Video thumbnail';
+      img.referrerPolicy = 'no-referrer';
+      img.src = safeUrl;
+      img.onerror = () => {
+        wrap.replaceChildren();
+        const fallback = document.createElement('span');
+        fallback.textContent = 'Preview unavailable';
+        wrap.appendChild(fallback);
+      };
+      wrap.appendChild(img);
+    }
+    function renderResult(data) {
+      document.getElementById('videoTitle').textContent = data.title || 'Video';
+      document.getElementById('videoUploader').textContent = 'By ' + (data.uploader || 'Unknown creator');
+      document.getElementById('platformBadge').textContent = data.platform || 'VIDEO';
+      setThumbnail(data.thumbnail || '');
+
+      const directUrl = safeHttpUrl(data.direct_url || '');
+      if (!directUrl) throw new Error('The extractor did not return a valid video link.');
+      const proxy = '/api/proxy-download?url=' + encodeURIComponent(directUrl) + '&filename=phantom_no_watermark.mp4';
+      downloadBtn.href = proxy;
+      directBtn.href = directUrl;
+      downloadBtn.textContent = data.platform === 'TikTok' && data.is_no_watermark
+        ? '↓ Download NO WATERMARK HD'
+        : '↓ Download Video';
+      downloadNote.textContent = data.platform === 'TikTok' && data.is_no_watermark
+        ? 'HD no-watermark stream found. Download uses the backend proxy to avoid saving an expired HTML page.'
+        : 'Direct video stream found. Watermark removal is not guaranteed for this platform; download uses the backend proxy.';
+      resultPanel.classList.add('show');
+      resultPanel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+    function makeHistoryItem(item) {
+      const row = document.createElement('div');
+      row.className = 'history-item';
+      const img = document.createElement('img');
+      img.className = 'history-thumb';
+      img.alt = '';
+      img.loading = 'lazy';
+      img.referrerPolicy = 'no-referrer';
+      img.src = safeHttpUrl(item.thumbnail || '') || '';
+      img.onerror = () => { img.style.visibility = 'hidden'; };
+
+      const copy = document.createElement('div');
+      copy.className = 'history-copy';
+      const title = document.createElement('div');
+      title.className = 'history-title';
+      title.textContent = item.title || 'Untitled video';
+      const meta = document.createElement('div');
+      meta.className = 'history-meta';
+      let when = '';
+      if (item.created_at) {
+        const date = new Date(item.created_at);
+        if (!Number.isNaN(date.getTime())) when = ' · ' + date.toLocaleString();
+      }
+      meta.textContent = (item.platform || 'Video') + when;
+      copy.append(title, meta);
+
+      const useBtn = document.createElement('button');
+      useBtn.type = 'button';
+      useBtn.className = 'history-use';
+      useBtn.textContent = 'Use link';
+      useBtn.disabled = !safeHttpUrl(item.url || '');
+      useBtn.addEventListener('click', () => {
+        urlInput.value = item.url;
+        urlInput.focus();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      });
+      row.append(img, copy, useBtn);
+      return row;
+    }
+    async function loadHistory() {
+      try {
+        const response = await fetch('/api/history', { headers: { 'Accept': 'application/json' } });
+        const data = await response.json();
+        const items = Array.isArray(data.history) ? data.history : [];
+        historyCount.textContent = items.length + (items.length === 1 ? ' item' : ' items');
+        historyList.replaceChildren();
+        if (!items.length) {
+          const empty = document.createElement('div');
+          empty.className = 'empty';
+          empty.textContent = 'Your recent extractions will show up here.';
+          historyList.appendChild(empty);
+          return;
+        }
+        items.slice(0, 15).forEach(item => historyList.appendChild(makeHistoryItem(item)));
+      } catch (_) {
+        historyList.innerHTML = '<div class="empty">History is currently unavailable.</div>';
+      }
+    }
+    async function checkHealth() {
+      const dot = document.getElementById('healthDot');
+      const text = document.getElementById('healthText');
+      try {
+        const response = await fetch('/api/health');
+        if (!response.ok) throw new Error('offline');
+        dot.style.background = 'var(--green)';
+        text.textContent = 'Service online';
+      } catch (_) {
+        dot.style.background = 'var(--danger)';
+        dot.style.boxShadow = 'none';
+        text.textContent = 'Service unreachable';
+      }
+    }
+
+    form.addEventListener('submit', async event => {
+      event.preventDefault();
+      hideMessage();
+      resultPanel.classList.remove('show');
+      const url = safeHttpUrl(urlInput.value.trim());
+      if (!url) {
+        showMessage('Paste a valid public http:// or https:// URL.', true);
+        return;
+      }
+      setLoading(true);
+      showMessage('Checking the link and looking for the best available stream…');
+      try {
+        const response = await fetch('/api/download', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+          body: JSON.stringify({ url })
+        });
+        const data = await response.json().catch(() => ({}));
+        if (!response.ok || !data.success) throw new Error(data.error || 'Extraction failed. Try another public video link.');
+        renderResult(data);
+        showMessage('Extraction complete. Your download link is ready.');
+        await loadHistory();
+      } catch (error) {
+        showMessage(error.message || 'Something went wrong. Please try again.', true);
+      } finally {
+        setLoading(false);
+      }
+    });
+
+    downloadBtn.addEventListener('click', event => {
+      if (!downloadBtn.href || downloadBtn.getAttribute('href') === '#') {
+        event.preventDefault();
+        showMessage('Extract a video first.', true);
+      }
+    });
+
+    checkHealth();
+    loadHistory();
+  </script>
+</body>
+</html>
